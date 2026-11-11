@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- app_icon.png is now the finished, opaque logo (with its own white rounded-square
+         background baked in), not bare transparent artwork — so the background layer matches
+         its white so any mask-shape gap at the edges blends in instead of showing a hole. -->
+    <background android:drawable="@android:color/white" />
+    <foreground>
+        <inset
+            android:drawable="@drawable/app_icon"
+            android:inset="6%" />
+    </foreground>
+</adaptive-icon>

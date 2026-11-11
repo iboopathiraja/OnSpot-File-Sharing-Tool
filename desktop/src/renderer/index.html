@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'">
+<title>OnSpot</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<svg class="defs" aria-hidden="true"><defs><linearGradient id="gradArc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="ga1"/><stop offset="1" class="ga2"/></linearGradient></defs></svg>
+
+<div id="app">
+  <!-- ============ title bar (Windows draws min / max / close on the right) ============ -->
+  <header class="titlebar">
+    <img class="tb-icon" src="app-icon.png" alt="">
+    <span class="tb-name">OnSpot</span>
+    <label class="tb-search">
+      <i class="fi">&#xE721;</i>
+      <input id="globalSearch" placeholder="Search files, messages and devices" spellcheck="false">
+      <kbd>Ctrl+F</kbd>
+    </label>
+  </header>
+
+  <div class="shell">
+    <!-- ============ navigation pane ============ -->
+    <aside class="sidebar">
+      <button id="meBtn" class="profile" title="Your device (Ctrl+,)">
+        <img id="selfAvatar" alt="">
+        <span class="profile-text"><b id="selfName"></b><small><i id="netDot" class="dot on"></i><span id="netChipTxt"></span></small></span>
+      </button>
+      <button id="sendBtn" class="btn primary send-btn" title="Send (Ctrl+O)"><i class="fi">&#xE724;</i>Send files</button>
+
+      <nav class="side-nav">
+        <button class="nav-item sel" data-page="home"><i class="fi">&#xE80F;</i><span>Home</span></button>
+        <button class="nav-item" data-page="received"><i class="fi">&#xE896;</i><span>Received</span><b id="recvBadge" class="nav-badge hidden"></b></button>
+        <button class="nav-item" data-page="activity"><i class="fi">&#xE81C;</i><span>Activity</span></button>
+      </nav>
+
+      <div class="side-head"><span>Nearby</span><button id="refreshBtn" class="icon-btn" title="Scan again (F5)" aria-label="Scan again"><i class="fi">&#xE72C;</i></button></div>
+      <div id="sideDevices" class="side-devices"></div>
+      <div id="sideNoDevices" class="side-empty hidden"><span class="spinner"></span>Looking for devices…</div>
+
+      <div class="side-bottom">
+        <button id="dock" class="dock hidden" title="Show transfers">
+          <span class="dock-ring"><svg viewBox="0 0 36 36"><circle class="trk" cx="18" cy="18" r="15"/><circle id="dockArc" class="arc" cx="18" cy="18" r="15"/></svg><span id="dockPct"></span></span>
+          <span class="dock-text"><b id="dockTitle"></b><small id="dockSub"></small></span>
+        </button>
+        <button id="settingsBtn" class="nav-item"><i class="fi">&#xE713;</i><span>Settings</span></button>
+      </div>
+    </aside>
+
+    <!-- ============ content ============ -->
+    <main id="scroller" class="content">
+      <div class="page-head">
+        <button id="backBtn" class="icon-btn hidden" title="Back (Esc)" aria-label="Back"><i class="fi">&#xE72B;</i></button>
+        <div class="page-title"><h1 id="pageTitle">Home</h1><small id="pageSub"></small></div>
+        <div id="pageActions" class="page-actions"></div>
+      </div>
+
+      <!-- HOME -->
+      <section id="page-home" class="page">
+        <div class="section-head"><h2>Nearby devices</h2><small id="nearbyCount"></small></div>
+        <div id="people" class="people"></div>
+        <div id="nearbyEmpty" class="nearby-empty hidden">
+          <div class="mini-radar"><i></i><i></i><img id="radarAvatar" alt=""></div>
+          <div><b>Looking for nearby devices…</b><small id="nearbyEmptySub">Open OnSpot on your phone and stay on the same Wi‑Fi.</small></div>
+        </div>
+
+        <div id="collectionsHead" class="section-head"><h2>Recently shared</h2></div>
+        <div id="collections" class="collections"></div>
+
+        <div id="homeEmpty" class="hero-empty hidden">
+          <div class="stack-illus"><span class="sc c1"></span><span class="sc c2"></span><span class="sc c3"><span class="sc-in"></span></span></div>
+          <h2>It starts with a share</h2>
+          <p>Send a photo, a file or a link to any device nearby.</p>
+          <button id="firstSendBtn" class="btn primary lg">Send your first file</button>
+        </div>
+      </section>
+
+      <!-- DEVICE -->
+      <section id="page-device" class="page hidden">
+        <div class="device-hero">
+          <div id="devStack" class="polaroid-stack"></div>
+          <div class="device-info">
+            <h2 id="devName"></h2>
+            <p id="devMeta"></p>
+            <div class="dev-buttons">
+              <button id="devSendBtn" class="btn primary lg"><i class="fi">&#xE8E5;</i>Send files</button>
+              <button id="devMoreBtn" class="btn lg"><i class="fi">&#xE8B7;</i>Send a folder</button>
+            </div>
+          </div>
+        </div>
+        <div id="devBanner" class="banner hidden">
+          <i class="fi">&#xE7BA;</i>
+          <span id="devBannerText"></span><button id="devBannerBtn" class="btn sm hidden"></button>
+        </div>
+        <div class="tile-row">
+          <button id="devTextBtn" class="soft-tile t-lav"><span class="st-ic"><i class="fi">&#xE8D2;</i></span><b>Send text</b><small>A message or a link</small></button>
+          <button id="devClipBtn" class="soft-tile t-pink"><span class="st-ic"><i class="fi">&#xE77F;</i></span><b>Send clipboard</b><small>Whatever you copied</small></button>
+          <label class="soft-tile t-mint toggle-tile">
+            <span class="st-ic"><i class="fi">&#xE895;</i></span>
+            <b>Clipboard sync</b><small id="clipSyncSub">Copy here, paste there</small>
+            <input type="checkbox" id="clipSyncToggle"><span class="switch"><i></i></span>
+          </label>
+        </div>
+        <div id="devTextBox" class="text-box hidden">
+          <textarea id="devTextInput" rows="3" placeholder="Type a message or paste a link…"></textarea>
+          <div class="text-actions"><small>Ctrl+Enter to send</small><button id="devTextCancel" class="btn">Cancel</button><button id="devTextSend" class="btn primary">Send</button></div>
+        </div>
+        <div class="section-head"><h2 id="devListTitle">Shared together</h2></div>
+        <div id="devItems" class="row-list"></div>
+        <div id="devEmpty" class="empty-note hidden"><b>Nothing shared yet</b><small>Drop files anywhere on this window to send them.</small></div>
+      </section>
+
+      <!-- RECEIVED -->
+      <section id="page-received" class="page hidden">
+        <div class="ready-card">
+          <div class="beacon"><i></i><i></i><i></i><img id="beaconAvatar" alt=""></div>
+          <div class="ready-text">
+            <span class="ready-pill"><i class="dot on"></i>Ready to receive</span>
+            <h2 id="recvName"></h2>
+            <small id="recvSub"></small>
+          </div>
+        </div>
+        <div class="settings-card">
+          <button id="recvFolderBtn" class="setting-row">
+            <i class="fi">&#xE8B7;</i>
+            <span><b>Save received files to</b><small id="recvFolder"></small></span>
+            <span class="row-end">Change<i class="fi">&#xE76C;</i></span>
+          </button>
+          <label class="setting-row">
+            <i class="fi">&#xE72E;</i>
+            <span><b>Accept from</b><small id="acceptLabel">Nearby devices only</small></span>
+            <span class="row-end"><span class="switch-label" id="acceptState">On</span><input type="checkbox" id="recvNearbyOnly"><span class="switch"><i></i></span></span>
+          </label>
+        </div>
+        <div id="incomingSection" class="hidden">
+          <div class="section-head"><h2>Receiving now</h2></div>
+          <div id="incomingList" class="row-list"></div>
+        </div>
+        <div class="section-head"><h2>Received</h2><button id="openFolderBtn" class="btn sm"><i class="fi">&#xE838;</i>Open folder</button></div>
+        <div id="recvChips" class="chips"></div>
+        <div id="receivedGrid" class="polaroid-grid"></div>
+        <div id="receivedEmpty" class="empty-note"><b>Nothing received yet</b><small>On your phone, open OnSpot and pick this PC.</small></div>
+      </section>
+
+      <!-- ACTIVITY -->
+      <section id="page-activity" class="page hidden">
+        <div class="chips-bar"><div id="historyFilters" class="chips"></div><button id="clearHistoryBtn" class="btn sm"><i class="fi">&#xE74D;</i>Clear history</button></div>
+        <div id="historyList" class="history-list"></div>
+        <div id="historyEmpty" class="empty-note hidden"><b>No transfers here yet</b><small>Everything you send and receive shows up here.</small></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Send dialog -->
+<div id="sendSheet" class="modal hidden">
+  <div class="dialog send-dialog" role="dialog" aria-labelledby="sendTitle">
+    <header class="sheet-head"><div class="sheet-title"><h3 id="sendTitle">Send</h3><small id="traySummary">Choose what to send</small></div>
+      <button id="clearTrayBtn" class="btn sm hidden">Clear</button>
+      <button id="sendClose" class="icon-btn" aria-label="Close"><i class="fi">&#xE711;</i></button>
+    </header>
+    <div class="pick-row">
+      <button class="soft-tile t-blue" id="addFilesBtn"><span class="st-ic"><i class="fi">&#xE8A5;</i></span><b>Files</b></button>
+      <button class="soft-tile t-yellow" id="addFolderBtn"><span class="st-ic"><i class="fi">&#xE8B7;</i></span><b>Folder</b></button>
+      <button class="soft-tile t-lav" id="addTextBtn"><span class="st-ic"><i class="fi">&#xE8D2;</i></span><b>Text</b></button>
+      <button class="soft-tile t-pink" id="addClipBtn"><span class="st-ic"><i class="fi">&#xE77F;</i></span><b>Clipboard</b></button>
+    </div>
+    <div id="textEditor" class="text-box hidden">
+      <textarea id="textInput" rows="3" placeholder="Type a message or paste a link…"></textarea>
+      <div class="text-actions"><small id="textCount"></small><button id="cancelTextBtn" class="btn">Cancel</button><button id="addTextConfirm" class="btn primary">Add</button></div>
+    </div>
+    <div id="trayList" class="tray-list"></div>
+    <div id="dropHint" class="drop-hint"><i class="fi">&#xE898;</i>Or drop files and folders anywhere on this window</div>
+    <div class="section-head"><h2>Send to</h2><small id="sendToHint">Pick a device</small></div>
+    <div id="sendPeople" class="people in-sheet"></div>
+    <div id="sendNoPeople" class="empty-note hidden"><b>No devices nearby yet</b><small>Open OnSpot on your phone on the same Wi‑Fi.</small></div>
+  </div>
+</div>
+
+<div id="dropOverlay" class="drop-overlay hidden"><div class="drop-card"><div class="stack-illus small"><span class="sc c1"></span><span class="sc c2"></span><span class="sc c3"><span class="sc-in"></span></span></div><strong id="dropText">Drop to send</strong><small id="dropSub">Drop on a device to send straight away</small></div></div>
+<div id="requests"></div>
+<div id="toast" class="hidden"></div>
+
+<!-- Settings -->
+<div id="modal" class="modal hidden">
+  <div class="dialog" role="dialog" aria-labelledby="modalTitle">
+    <div class="dialog-body">
+      <header class="dialog-head">
+        <span class="ring lg"><img id="previewAvatar" alt=""></span>
+        <div><h3 id="modalTitle">Your device</h3><small id="modalSub">How others see this PC</small></div>
+      </header>
+      <div class="field-group">
+        <label>Device name<input id="setName" maxlength="40" spellcheck="false"></label>
+        <div class="label">Avatar</div>
+        <div id="avatarGrid" class="avatars"></div>
+      </div>
+      <div class="field-group">
+        <div class="group-title">Appearance</div>
+        <div id="themeSeg" class="seg">
+          <button type="button" data-theme-opt="system">Use Windows setting</button>
+          <button type="button" data-theme-opt="light">Light</button>
+          <button type="button" data-theme-opt="dark">Dark</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="group-title">Connection</div>
+        <div class="modes" id="modeGroup">
+          <button type="button" class="mode" data-mode="wifi"><b>Wi‑Fi network</b><small>Finds every device on the Wi‑Fi you pick, even if the router blocks auto‑discovery.</small></button>
+          <button type="button" class="mode" data-mode="hotspot"><b>Mobile hotspot</b><small>Direct link: one device shares its hotspot and the others join it.</small></button>
+        </div>
+        <label id="netRow">Network to scan<select id="setNet"></select></label>
+      </div>
+      <div class="field-group">
+        <div class="group-title">Receiving</div>
+        <label>Save received files to
+          <div class="dir-row"><input id="setDir" readonly><button id="dirBtn" class="btn">Browse…</button></div>
+        </label>
+        <label class="toggle-row">
+          <span><b>Only accept from Nearby devices</b><small>Files and messages from anything not in your Nearby list are blocked.</small></span>
+          <input type="checkbox" id="setNearbyOnly"><span class="switch"><i></i></span>
+        </label>
+      </div>
+      <div class="field-group">
+        <div class="group-title">General</div>
+        <label class="toggle-row">
+          <span><b>Start with Windows</b><small>Runs quietly in the tray so phones can always find this PC.</small></span>
+          <input type="checkbox" id="setStart"><span class="switch"><i></i></span>
+        </label>
+      </div>
+    </div>
+    <div class="dialog-actions"><small id="versionTxt" class="version"></small><button id="saveBtn" class="btn primary">Save</button><button id="cancelBtn" class="btn">Cancel</button></div>
+  </div>
+</div>
+<script src="renderer.js"></script>
+</body>
+</html>
