@@ -20,6 +20,17 @@ OnSpot is a small, fast way to move things between the devices on your desk. Ope
 
 Nothing leaves your network. There's no account, no upload and no file size limit beyond your disk space.
 
+## Download
+
+| Platform | Download | Requirements |
+|---|---|---|
+| **Windows** | [**OnSpot-Setup.exe**](https://github.com/iboopathiraja/OnSpot-File-Sharing-Tool/releases/latest/download/OnSpot-Setup.exe) | Windows 10 or 11 (64-bit) |
+| **Android** | [**OnSpot.apk**](https://github.com/iboopathiraja/OnSpot-File-Sharing-Tool/releases/latest/download/OnSpot.apk) | Android 7.0 or newer |
+
+All versions and their changes are listed on the [Releases](https://github.com/iboopathiraja/OnSpot-File-Sharing-Tool/releases) page.
+
+> **First install:** Windows may show *"Windows protected your PC"* because the installer isn't code-signed yet. Click **More info → Run anyway**. On Android, allow your browser or file manager to *install unknown apps* when asked.
+
 ## Features
 
 - **Finds devices automatically** with mDNS (`_onspot._tcp`) plus a UDP fallback, so it still works on routers that block multicast.
